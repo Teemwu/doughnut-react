@@ -1,4 +1,4 @@
-import { CanvasContext, createCanvasContext, createSelectorQuery, getSystemInfoSync } from '@tarojs/taro';
+import { CanvasContext, createCanvasContext, createSelectorQuery, getSystemInfoSync, nextTick } from '@tarojs/taro';
 import { PureComponent } from 'react';
 import { Canvas } from "@tarojs/components"
 
@@ -246,29 +246,31 @@ class Doughnut extends PureComponent<DoughnutProps, any> {
         this.textPoints = _textPoints
     }
     initCanvas() {
-        if (this.props.is2D) {
-            createSelectorQuery()
-                .select('#canvas')
-                .fields({ node: true, size: true })
-                .exec(res => {
-                    const _canvas = res[0].node
-                    const _ctx = _canvas.getContext('2d')
-                    const dpr = getSystemInfoSync().pixelRatio
+        nextTick(() => {
+            if (this.props.is2D) {
+                createSelectorQuery()
+                    .select('#canvas')
+                    .fields({ node: true, size: true })
+                    .exec(res => {
+                        const _canvas = res[0].node
+                        const _ctx = _canvas.getContext('2d')
+                        const dpr = getSystemInfoSync().pixelRatio
 
-                    _canvas.width = res[0].width * dpr
-                    _canvas.height = res[0].height * dpr
+                        _canvas.width = res[0].width * dpr
+                        _canvas.height = res[0].height * dpr
 
-                    _ctx.scale(dpr, dpr)
+                        _ctx.scale(dpr, dpr)
 
-                    this.canvas = _canvas
-                    this.ctx = _ctx
-                    if (_ctx) this.animate()
-                })
-        } else {
-            const ctx = createCanvasContext('canvas')
-            this.ctx = ctx
-            if (ctx) this.animate()
-        }
+                        this.canvas = _canvas
+                        this.ctx = _ctx
+                        if (_ctx) this.animate()
+                    })
+            } else {
+                const ctx = createCanvasContext('canvas')
+                this.ctx = ctx
+                if (ctx) this.animate()
+            }
+        })
     }
     init() {
         const { border, is2D, value, width, height } = this.props

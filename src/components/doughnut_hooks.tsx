@@ -1,4 +1,4 @@
-import { FC, CanvasContext, createSelectorQuery, getSystemInfoSync, createCanvasContext } from '@tarojs/taro'
+import { FC, CanvasContext, createSelectorQuery, getSystemInfoSync, createCanvasContext, nextTick } from '@tarojs/taro'
 import { Canvas } from "@tarojs/components"
 import { useEffect, useMemo } from 'react'
 
@@ -220,29 +220,31 @@ export const Doughnut: FC<Props> = (props: Props) => {
         textPoints = _textPoints
     }
     function initCanvas() {
-        if (props.is2D) {
-            createSelectorQuery()
-                .select('#canvas')
-                .fields({ node: true, size: true })
-                .exec(res => {
-                    const _canvas = res[0].node
-                    const _ctx = _canvas.getContext('2d')
-                    const dpr = getSystemInfoSync().pixelRatio
+        nextTick(() => {
+            if (props.is2D) {
+                createSelectorQuery()
+                    .select('#canvas')
+                    .fields({ node: true, size: true })
+                    .exec(res => {
+                        const _canvas = res[0].node
+                        const _ctx = _canvas.getContext('2d')
+                        const dpr = getSystemInfoSync().pixelRatio
 
-                    _canvas.width = res[0].width * dpr
-                    _canvas.height = res[0].height * dpr
+                        _canvas.width = res[0].width * dpr
+                        _canvas.height = res[0].height * dpr
 
-                    _ctx.scale(dpr, dpr)
+                        _ctx.scale(dpr, dpr)
 
-                    canvas = _canvas
-                    ctx = _ctx
-                    if (ctx) animate()
-                })
-        } else {
-            ctx = createCanvasContext('canvas')
-            if (ctx) animate()
+                        canvas = _canvas
+                        ctx = _ctx
+                        if (ctx) animate()
+                    })
+            } else {
+                ctx = createCanvasContext('canvas')
+                if (ctx) animate()
 
-        }
+            }
+        })
     }
     function init() {
         const { border, is2D, value, width, height } = props
